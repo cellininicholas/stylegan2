@@ -292,16 +292,14 @@ def square_interpolate(zs, steps_per_row):
     out: list[list] = []
     # proceed using bilinear interpolation based on the 4 corners
     for row in range(steps_per_row):
-        out.append([])
         # interpolate in y, then x
         y_fraction = row / steps_per_row
         y_lerp_a = a * y_fraction + b * (1 - y_fraction)
         y_lerp_c = c * y_fraction + d * (1 - y_fraction)
         for i in range(steps_per_row):
             x_fraction = i / steps_per_row
-            full_lerp = y_lerp_a*x_fraction + y_lerp_c*(1-x_fraction)
-            out[row].append(full_lerp)
-
+            full_lerp = y_lerp_a * x_fraction + y_lerp_c * (1 - x_fraction)
+            out.append(full_lerp)
     return out
 
 
@@ -317,10 +315,6 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
         zs = generate_zs_from_seeds(seeds, Gs)
     elif(len(npys) > 0):
         zs = npys
-
-    if(len(zs) > 2):
-        print('not enough values to generate walk')
-#         return false;
 
     # Default = "line"
     walk_type = walk_type.split('-')
