@@ -296,11 +296,11 @@ def square_interpolate(zs, steps_per_row):
     for row in range(steps_per_row+1):
         # interpolate in y, then x
         y_fraction = row / steps_per_row
-        y_lerp_a = a * y_fraction + b * (1 - y_fraction)
-        y_lerp_c = c * y_fraction + d * (1 - y_fraction)
+        y_lerp_1 = d * y_fraction + b * (1 - y_fraction)
+        y_lerp_2 = c * y_fraction + a * (1 - y_fraction)
         for i in range(steps_per_row+1):
             x_fraction = i / steps_per_row
-            full_lerp = y_lerp_a * x_fraction + y_lerp_c * (1 - x_fraction)
+            full_lerp = y_lerp_1 * x_fraction + y_lerp_2 * (1 - x_fraction)
             out.append(full_lerp)
     return out
 
