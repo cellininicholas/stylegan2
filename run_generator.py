@@ -19,7 +19,7 @@ import os
 
 import pretrained_networks
 
-# from https://colab.research.google.com/drive/1ShgW6wohEFQtqs_znMna3dzrcVoABKIH
+# from https://colab.earch.google.com/drive/1ShgW6wohEFQtqs_znMna3dzrcVoABKIH
 
 
 def generate_zs_from_seeds(seeds, Gs):
@@ -288,15 +288,17 @@ def square_interpolate(zs, steps_per_row):
     if len(zs) != 4:
         print("latent squares require exactly 4 seeds")
         exit()
+    steps_per_row -= 1
     a, b, c, d = zs  # destructure for clearer references
+    # calculate opposite corners
     out: list[list] = []
     # proceed using bilinear interpolation based on the 4 corners
-    for row in range(steps_per_row):
+    for row in range(steps_per_row+1):
         # interpolate in y, then x
         y_fraction = row / steps_per_row
         y_lerp_a = a * y_fraction + b * (1 - y_fraction)
         y_lerp_c = c * y_fraction + d * (1 - y_fraction)
-        for i in range(steps_per_row):
+        for i in range(steps_per_row+1):
             x_fraction = i / steps_per_row
             full_lerp = y_lerp_a * x_fraction + y_lerp_c * (1 - x_fraction)
             out.append(full_lerp)
