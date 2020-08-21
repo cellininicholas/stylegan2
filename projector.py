@@ -192,8 +192,8 @@ class Projector:
 
     # filename: '%s%05d.npy' % (prefix, row)
     def save_npy(npy_file_prefix):
-        dlatent = self.get_dlatents()
-        np.save(dnnlib.make_run_dir_path('%s.npy' % (npy_file_prefix)), dlatent)
+        dlatents = self.get_dlatents()
+        np.save(dnnlib.make_run_dir_path('%s.npy' % (npy_file_prefix)), dlatents)
 
     def get_cur_step(self):
         return self._cur_step
