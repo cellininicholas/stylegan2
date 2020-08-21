@@ -69,8 +69,9 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
 
-        print(type(images))
-        print(type(labels))
+        print('project_real_images() images type: '+ type(images) +', shape: ' + images.shape)
+        print('project_real_images() labels type: '+ type(labels) +', shape: ' + labels.shape)
+        print(labels)
         project_image(proj, targets=images, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), num_snapshots=num_snapshots, save_npy=save_vector, npy_file_prefix='image-name')
 
 #----------------------------------------------------------------------------
