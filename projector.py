@@ -106,7 +106,7 @@ class Projector:
         self._target_images_var = tf.Variable(tf.zeros(proc_images_expr.shape), name='target_images_var')
         if self._lpips is None:
             self._lpips = misc.load_pkl('./pkl/vgg16_zhang_perceptual.pkl') # vgg16_zhang_perceptual.pkl
-        self._dist = self._lpips.get_output_for(proc_images_expr, self._target_images_var)
+        self._dist = self._lpips.get_output_for(tf.cast(proc_images_expr, tf.float32), self._target_images_var)
         self._loss = tf.reduce_sum(self._dist)
 
         # Noise regularization graph.
