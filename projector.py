@@ -193,6 +193,11 @@ class Projector:
     # filename: '%s%05d.npy' % (prefix, row)
     def save_npy(self, npy_file_prefix):
         dlatents = self.get_dlatents()
+        if isinstance(dlatents, list):
+            dlatents = np.array(dlatents).reshape(1, 512)
+        elif isinstance(dlatents, np.ndarray):
+            dlatents.reshape(1, 512)
+
         # print(dlatents)
         print(dlatents.shape)
         # dnnlib.make_run_dir_path(filename) has already occured in project_real_images()
