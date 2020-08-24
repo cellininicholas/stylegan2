@@ -526,6 +526,9 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
     with TFRecordExporter(tfrecord_dir, len(image_filenames), print_progress=False) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
+        image_filenames_inorder = np.array(map(lambda i,: image_filenames[i], order))
+        print(image_filenames_inorder)
+
         for idx in tqdm(range(order.size)):
             img_filename = image_filenames[order[idx]]
             im = PIL.Image.open(img_filename)
@@ -538,8 +541,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
             else:
                 img = img.transpose([2, 0, 1]) # HWC => CHW
             tfr.add_image(img, img_filename)
-        image_filenames_inorder = map(lambda i,: image_filenames[i], order)
-        print(image_filenames_inorder)
+        
         tfr.add_labels(image_filenames_inorder)
 
 #----------------------------------------------------------------------------
