@@ -72,8 +72,8 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
     assert dataset_obj.shape == Gs.output_shape[1:]
 
     img_filenames = None
-    if dataset.self._np_filenames is not None:
-        img_filenames = list(dataset.self._np_filenames)
+    if dataset_obj.self._np_filenames is not None:
+        img_filenames = list(dataset_obj.self._np_filenames)
         assert len(img_filenames) == num_images
 
     for image_idx in range(num_images):
