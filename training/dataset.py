@@ -116,7 +116,7 @@ class TFRecordDataset:
         if self.filenames_file is not None:
             self._np_filenames = np.load(self.filenames_file)
             print(self._np_filenames)
-            self.filenames_size = self._np_filenames.shape[1]
+            self.filenames_size = self._np_filenames.shape[0]
 
         # Build TF expressions.
         with tf.name_scope('Dataset'), tf.device('/cpu:0'):
