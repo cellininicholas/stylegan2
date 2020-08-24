@@ -340,8 +340,8 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
             else:
                 for i in range(len(zs)):
                     ws.append(convertZtoW(zs[i]))
-                points = line_interpolate(ws, number_of_steps)
                 zpoints = line_interpolate(zs, number_of_steps)
+            points = line_interpolate(ws, number_of_steps)
         else:
             points = line_interpolate(zs, number_of_steps)
 
