@@ -65,7 +65,7 @@ class TFRecordExporter:
 
     def add_image(self, img, img_filepath=None):
         
-        img_filename = None
+        img_filename = ''
         if (img_filepath is not None):
             img_filename = os.path.basename(img_filepath)
             print("add_image() img_filename: " + img_filename + ", path: " + img_filepath)
@@ -90,10 +90,9 @@ class TFRecordExporter:
             quant = np.rint(img).clip(0, 255).astype(np.uint8)
             ex = tf.train.Example(features=tf.train.Features(feature={
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
-                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))
+                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()])),
+                'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_filename]))
             }))
-            if img_filename is not None:
-                ex['filename'] = img_filename
 
             tfr_writer.write(ex.SerializeToString())
         self.cur_images += 1
