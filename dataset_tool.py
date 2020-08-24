@@ -90,8 +90,7 @@ class TFRecordExporter:
             quant = np.rint(img).clip(0, 255).astype(np.uint8)
             ex = tf.train.Example(features=tf.train.Features(feature={
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
-                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()])),
-                'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[str.encode(img_filename)]))
+                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))
             }))
 
             tfr_writer.write(ex.SerializeToString())
@@ -539,6 +538,9 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
             else:
                 img = img.transpose([2, 0, 1]) # HWC => CHW
             tfr.add_image(img, img_filename)
+        image_filenames_inorder = map(lambda i,: image_filenames[i], order)
+        print(image_filenames_inorder)
+        tfr.add_labels(image_filenames_inorder)
 
 #----------------------------------------------------------------------------
 

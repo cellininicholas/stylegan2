@@ -105,9 +105,7 @@ class TFRecordDataset:
                 dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb<<20)
                 if max_images is not None:
                     dset = dset.take(max_images)
-                dset_data, dset_filename = self.parse_tfrecord_tf
-                print (dset_filename)
-                dset = dset.map(dset_data, num_parallel_calls=num_threads)
+                dset = dset.map(self.parse_tfrecord_tf, num_parallel_calls=num_threads)
                 dset = tf.data.Dataset.zip((dset, self._tf_labels_dataset))
                 bytes_per_item = np.prod(tfr_shape) * np.dtype(self.dtype).itemsize
                 if shuffle_mb > 0:
@@ -164,10 +162,9 @@ class TFRecordDataset:
     def parse_tfrecord_tf(record):
         features = tf.parse_single_example(record, features={
             'shape': tf.FixedLenFeature([3], tf.int64),
-            'data': tf.FixedLenFeature([], tf.string),
-            'filename': tf.FixedLenFeature([], tf.string)})
+            'data': tf.FixedLenFeature([], tf.string)})
         data = tf.decode_raw(features['data'], tf.uint8)
-        return tf.reshape(data, features['shape']), features['filename']
+        return tf.reshape(data, features['shape'])
 
     # Parse individual image from a tfrecords file into NumPy array.
     @staticmethod
