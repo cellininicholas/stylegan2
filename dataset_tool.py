@@ -96,6 +96,13 @@ class TFRecordExporter:
             tfr_writer.write(ex.SerializeToString())
         self.cur_images += 1
 
+    def add_labels_strings(self, labels):
+        if self.print_progress:
+            print('%-40s\r' % 'Saving label strings...', end='', flush=True)
+        assert labels.shape[0] == self.cur_images
+        with open(self.tfr_prefix + '-rxx.labels', 'wb') as f:
+            np.save(f, labels.astype(np.str))
+
     def add_labels(self, labels):
         if self.print_progress:
             print('%-40s\r' % 'Saving labels...', end='', flush=True)
@@ -526,7 +533,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
     with TFRecordExporter(tfrecord_dir, len(image_filenames), print_progress=False) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
-        image_filenames_inorder = np.array(list(map(lambda i,: image_filenames[i], order)))
+        image_filenames_inorder = np.array(list(map(lambda i,: os.path.basename(image_filenames[i]), order)))
         print(image_filenames_inorder)
 
         for idx in tqdm(range(order.size)):
@@ -542,7 +549,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
                 img = img.transpose([2, 0, 1]) # HWC => CHW
             tfr.add_image(img, img_filename)
         
-        tfr.add_labels(image_filenames_inorder)
+        tfr.add_labels_strings(image_filenames_inorder)
 
 #----------------------------------------------------------------------------
 
