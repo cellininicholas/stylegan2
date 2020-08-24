@@ -74,6 +74,7 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
     img_filenames = None
     if dataset_obj._np_filenames is not None:
         img_filenames = dataset_obj._np_filenames
+        print (img_filenames)
         assert len(img_filenames) == num_images
 
     for image_idx in range(num_images):
@@ -81,16 +82,9 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
 
-        # print('project_real_images() images shape and type')
-        # print(images.shape) # (N, 3, 1024, 1024)
-        # print(type(images))
-
-        # print('project_real_images() labels shape and type')
-        # print(type(labels)) # (N, 0)
-        # print(labels.shape)
-        # print(labels[0])
-        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
-        print('Filename: %s) ...' % (filename))
+        filename = 'z_pos'
+        # filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
+        # print('Filename: %s) ...' % (filename))
 
         project_image(proj, targets=images, labels=labels, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
                             num_snapshots=num_snapshots, save_npy=save_vector, npy_file_prefix=filename)
