@@ -192,11 +192,11 @@ class Projector:
 
     # filename: '%s%05d.npy' % (prefix, row)
     def save_npy(self, npy_file_prefix):
-        # dlatents = self.get_dlatents()
+        dlatents = self.get_dlatents()
         # print(dlatents)
-        # print(dlatents.shape)
+        print(dlatents.shape)
         # dnnlib.make_run_dir_path(filename) has already occured in project_real_images()
-        np.save('%s.npy' % (npy_file_prefix), self.get_dlatents())
+        np.save('%s.npy' % (npy_file_prefix), dlatents)
 
     def get_cur_step(self):
         return self._cur_step
