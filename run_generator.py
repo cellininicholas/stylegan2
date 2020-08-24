@@ -313,7 +313,7 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
     ) if name.startswith('noise')]
     zs = []
 
-    if(len(seeds) > 0):
+    if(seeds is not None or len(seeds) > 0):
         zs = generate_zs_from_seeds(seeds, Gs)
     elif(len(npys) > 0):
         zs = npys
