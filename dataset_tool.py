@@ -63,10 +63,12 @@ class TFRecordExporter:
         np.random.RandomState(123).shuffle(order)
         return order
 
-    def add_image(self, img, img_filename=None):
+    def add_image(self, img, img_filepath=None):
         
-        if (img_filename is not None):
-            print("add_image() img_filename:" + img_filename)
+        img_filename = None
+        if (img_filepath is not None):
+            img_filename = os.path.basename(img_filepath)
+            print("add_image() img_filename: " + img_filename + ", path: " + img_filepath)
 
         if self.print_progress and self.cur_images % self.progress_interval == 0:
             print('%d / %d\r' % (self.cur_images, self.expected_images), end='', flush=True)
@@ -90,6 +92,9 @@ class TFRecordExporter:
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
                 'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))
             }))
+            if img_filename is not None:
+                ex['filename'] = img_filename
+
             tfr_writer.write(ex.SerializeToString())
         self.cur_images += 1
 
