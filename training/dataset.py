@@ -38,6 +38,13 @@ class TFRecordDataset:
         self.label_file         = label_file
         self.label_size         = None      # components
         self.label_dtype        = None
+
+        self.filenames_file     = None
+        self.filenames_size     = None      # components
+        self.filenames_dtype    = None
+
+        self._np_filenames         = None
+
         self._np_labels         = None
         self._tf_minibatch_in   = None
         self._tf_labels_var     = None
@@ -86,6 +93,7 @@ class TFRecordDataset:
         self._np_labels = np.zeros([1<<30, 0], dtype=np.float32)
         if self.label_file is not None and max_label_size != 0:
             self._np_labels = np.load(self.label_file)
+            print(self._np_labels)
             assert self._np_labels.ndim == 2
         if max_label_size != 'full' and self._np_labels.shape[1] > max_label_size:
             self._np_labels = self._np_labels[:, :max_label_size]
@@ -93,6 +101,18 @@ class TFRecordDataset:
             self._np_labels = self._np_labels[:max_images]
         self.label_size = self._np_labels.shape[1]
         self.label_dtype = self._np_labels.dtype.name
+
+        # Autodetect filenames... filename.
+        filenames_guess = sorted(glob.glob(os.path.join(self.tfrecord_dir, '*.filenames')))
+        if len(filenames_guess):
+            self.filenames_file = filenames_guess[0]
+        if self.filenames_file is not None:
+            self._np_filenames = np.load(self.filenames_file)
+            print(self._np_filenames)
+            assert self._np_labels.ndim == 1
+
+        # Load filenames.
+        self._np_filenames = np.zeros([1<<30, 0], dtype=np.str)
 
         # Build TF expressions.
         with tf.name_scope('Dataset'), tf.device('/cpu:0'):
