@@ -441,7 +441,7 @@ def _parse_npy_files(files):
     print(files)
     zs = []
 
-    for f in files:
+    for f in files.split(','):
         print("NPY FILE: " + f)
         try:
             zs.append(np.load(files[f]))
