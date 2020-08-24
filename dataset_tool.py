@@ -91,7 +91,7 @@ class TFRecordExporter:
             ex = tf.train.Example(features=tf.train.Features(feature={
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
                 'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()])),
-                'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_filename]))
+                'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[str.encode(img_filename)]))
             }))
 
             tfr_writer.write(ex.SerializeToString())
