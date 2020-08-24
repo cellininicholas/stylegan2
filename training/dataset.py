@@ -109,7 +109,7 @@ class TFRecordDataset:
         if self.filenames_file is not None:
             self._np_filenames = np.load(self.filenames_file)
             print(self._np_filenames)
-            assert self._np_labels.ndim == 1
+            assert self._np_filenames.ndim == 1
 
         # Load filenames.
         self._np_filenames = np.zeros([1<<30, 0], dtype=np.str)

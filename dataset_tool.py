@@ -63,12 +63,12 @@ class TFRecordExporter:
         np.random.RandomState(123).shuffle(order)
         return order
 
-    def add_image(self, img, img_filepath=None):
+    def add_image(self, img):
         
-        img_filename = ''
-        if (img_filepath is not None):
-            img_filename = os.path.basename(img_filepath)
-            print("add_image() img_filename: " + img_filename + ", path: " + img_filepath)
+        # img_filename = ''
+        # if (img_filepath is not None):
+        #     img_filename = os.path.basename(img_filepath)
+        #     print("add_image() img_filename: " + img_filename + ", path: " + img_filepath)
 
         if self.print_progress and self.cur_images % self.progress_interval == 0:
             print('%d / %d\r' % (self.cur_images, self.expected_images), end='', flush=True)
@@ -537,7 +537,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         print(image_filenames_inorder)
 
         for idx in tqdm(range(order.size)):
-            img_filename = image_filenames[order[idx]]
+            # img_filename = image_filenames[order[idx]]
             im = PIL.Image.open(img_filename)
             img = np.asarray(im)
             if img.ndim != 3:
@@ -547,7 +547,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
                 img = img[np.newaxis, :, :] # HW => CHW
             else:
                 img = img.transpose([2, 0, 1]) # HWC => CHW
-            tfr.add_image(img, img_filename)
+            tfr.add_image(img)
         
         tfr.add_labels_filenames(image_filenames_inorder)
 
