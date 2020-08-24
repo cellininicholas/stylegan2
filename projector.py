@@ -191,7 +191,7 @@ class Projector:
             self._info('Done.')
 
     # filename: '%s%05d.npy' % (prefix, row)
-    def save_npy(npy_file_prefix):
+    def save_npy(self, npy_file_prefix):
         dlatents = self.get_dlatents()
         print(dlatents)
         print(dlatents.shape)

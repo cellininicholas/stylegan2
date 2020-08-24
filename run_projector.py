@@ -34,8 +34,7 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
     print('\r%-30s\r' % '', end='', flush=True)
 
     if npy_file_prefix is not None and save_npy:
-        full_path = npy_file_prefix + '.npy'
-        proj.save_npy(full_path)
+        proj.save_npy(npy_file_prefix + '.npy')
 
 #----------------------------------------------------------------------------
 
