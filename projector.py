@@ -195,10 +195,10 @@ class Projector:
         dlatents = self.get_dlatents()
         print(dlatents.shape)
 
-        if isinstance(dlatents, list):
-            dlatents = np.array(dlatents).reshape(1, 512)
-        elif isinstance(dlatents, np.ndarray):
-            dlatents[0].reshape(1, 512)
+        # if isinstance(dlatents, list):
+        #     dlatents = np.array(dlatents).reshape(1, 512)
+        # elif isinstance(dlatents, np.ndarray):
+        #     dlatents[0].reshape(1, 512)
         # print(dlatents)
         
         # dnnlib.make_run_dir_path(filename) has already occured in project_real_images()
