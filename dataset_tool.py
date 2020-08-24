@@ -526,8 +526,9 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
     with TFRecordExporter(tfrecord_dir, len(image_filenames), print_progress=False) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
-        image_filenames_inorder = np.array(map(lambda i,: image_filenames[i], order))
+        image_filenames_inorder = np.fromiter(map(lambda i,: image_filenames[i], order), dtype=np.string)
         print(image_filenames_inorder)
+        print(image_filenames_inorder.shape)
 
         for idx in tqdm(range(order.size)):
             img_filename = image_filenames[order[idx]]
