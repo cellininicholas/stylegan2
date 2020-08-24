@@ -443,7 +443,7 @@ def _parse_npy_files(files):
 
     for f in files.split(','):
         print("NPY FILE: '" + f + "'")
-        zs.append(np.load(files[f]))
+        zs.append(np.load(f))
         # try:
         #     zs.append(np.load(files[f]))
         # except IOError as e:
