@@ -64,6 +64,9 @@ class TFRecordExporter:
         return order
 
     def add_image(self, img):
+        print("add_image() img:...")
+        print(img)
+
         if self.print_progress and self.cur_images % self.progress_interval == 0:
             print('%d / %d\r' % (self.cur_images, self.expected_images), end='', flush=True)
         if self.shape is None:
@@ -84,7 +87,8 @@ class TFRecordExporter:
             quant = np.rint(img).clip(0, 255).astype(np.uint8)
             ex = tf.train.Example(features=tf.train.Features(feature={
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
-                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))}))
+                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))
+            }))
             tfr_writer.write(ex.SerializeToString())
         self.cur_images += 1
 
