@@ -23,8 +23,8 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
     misc.save_image_grid(targets, png_prefix + 'target.png', drange=[-1,1])
     proj.start(targets)
 
-    if npy_file_prefix is not None:
-        print ("project_image() npy_file_prefix: " + npy_file_prefix)
+    if npy_file_prefix is not None and save_npy:
+        print ("WILL SAVE npy_file to: " + npy_file_prefix + '.npy')
 
     while proj.get_cur_step() < proj.num_steps:
         print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
@@ -81,7 +81,7 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
 
         filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
-        print('Filename: %s) ...' % (filename))
+        print('Filename: %s ...' % (filename))
 
         project_image(proj, targets=images, labels=labels, 
                             png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
