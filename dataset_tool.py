@@ -63,9 +63,10 @@ class TFRecordExporter:
         np.random.RandomState(123).shuffle(order)
         return order
 
-    def add_image(self, img):
-        print("add_image() img:...")
-        print(img)
+    def add_image(self, img, img_filename=None):
+        
+        if (img_filename is not None):
+            print("add_image() img_filename:" + img_filename)
 
         if self.print_progress and self.cur_images % self.progress_interval == 0:
             print('%d / %d\r' % (self.cur_images, self.expected_images), end='', flush=True)
@@ -523,7 +524,8 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     with TFRecordExporter(tfrecord_dir, len(image_filenames), print_progress=False) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
         for idx in tqdm(range(order.size)):
-            im = PIL.Image.open(image_filenames[order[idx]])
+            img_filename = image_filenames[order[idx]]
+            im = PIL.Image.open(img_filename)
             img = np.asarray(im)
             if img.ndim != 3:
                 im = im.convert("RGB")
@@ -532,7 +534,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
                 img = img[np.newaxis, :, :] # HW => CHW
             else:
                 img = img.transpose([2, 0, 1]) # HWC => CHW
-            tfr.add_image(img)
+            tfr.add_image(img, img_filename)
 
 #----------------------------------------------------------------------------
 
