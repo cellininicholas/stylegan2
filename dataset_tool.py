@@ -538,7 +538,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
         for idx in tqdm(range(order.size)):
             # img_filename = image_filenames[order[idx]]
-            im = PIL.Image.open(img_filename)
+            im = PIL.Image.open(image_filenames[order[idx]])
             img = np.asarray(im)
             if img.ndim != 3:
                 im = im.convert("RGB")
