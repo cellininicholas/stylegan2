@@ -86,7 +86,7 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         project_image(proj, targets=images, labels=labels, 
                             png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
                             num_snapshots=num_snapshots, save_npy=save_vector, 
-                            npy_file_prefix=dnnlib.make_run_dir_path(filename)
+                            npy_file_prefix=dnnlib.make_run_dir_path(filename))
 
 #----------------------------------------------------------------------------
 
