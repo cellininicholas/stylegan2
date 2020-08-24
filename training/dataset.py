@@ -43,7 +43,7 @@ class TFRecordDataset:
         self.filenames_size     = None      # components
         self.filenames_dtype    = None
 
-        self._np_filenames         = None
+        self._np_filenames      = None
 
         self._np_labels         = None
         self._tf_minibatch_in   = None
@@ -108,7 +108,7 @@ class TFRecordDataset:
             self.filenames_file = filenames_guess[0]
         if self.filenames_file is not None:
             self._np_filenames = np.load(self.filenames_file)
-            print(self._np_filenames)
+            # print(self._np_filenames)
             assert self._np_filenames.ndim == 1
 
         # Load filenames.

@@ -36,7 +36,7 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
     if labels is not None:
         print(labels[0])
     if save_npy:
-        proj.save_npy(npy_file_prefix)
+        proj.save_npy(npy_file_prefix + '.npy')
 
 #----------------------------------------------------------------------------
 
@@ -71,8 +71,14 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
     dataset_obj = dataset.load_dataset(data_dir=data_dir, tfrecord_dir=dataset_name, max_label_size=0, repeat=False, shuffle_mb=0)
     assert dataset_obj.shape == Gs.output_shape[1:]
 
+    img_filenames = None
+    if dataset.self._np_filenames is not None:
+        img_filenames = list(dataset.self._np_filenames)
+        assert len(img_filenames) == num_images
+
     for image_idx in range(num_images):
-        print('Projecting image %d/%d ...' % (image_idx, num_images))
+        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
+        print('Projecting image %d/%d (%s) ...' % (image_idx, num_images, filename))
         images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
 
@@ -80,12 +86,13 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         print(images.shape) # (N, 3, 1024, 1024)
         print(type(images))
 
-        print('project_real_images() labels shape and type')
-        print(type(labels)) # (N, 0)
-        print(labels.shape)
-        print(labels[0])
+        # print('project_real_images() labels shape and type')
+        # print(type(labels)) # (N, 0)
+        # print(labels.shape)
+        # print(labels[0])
 
-        project_image(proj, targets=images, labels=labels, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), num_snapshots=num_snapshots, save_npy=save_vector, npy_file_prefix='image-name')
+        project_image(proj, targets=images, labels=labels, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
+                            num_snapshots=num_snapshots, save_npy=save_vector, npy_file_prefix=filename)
 
 #----------------------------------------------------------------------------
 
