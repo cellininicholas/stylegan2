@@ -443,12 +443,13 @@ def _parse_npy_files(files):
 
     for f in files.split(','):
         print("NPY FILE: '" + f + "'")
-        try:
-            zs.append(np.load(files[f]))
-        except IOError as e:
-            print ("I/O error(%d): %s" % (e.errno, e.strerror))
-        except ValueError:
-            print("An IOError occurred")
+        zs.append(np.load(files[f]))
+        # try:
+        #     zs.append(np.load(files[f]))
+        # except IOError as e:
+        #     print ("I/O error(%d): %s" % (e.errno, e.strerror))
+        # except ValueError:
+        #     print("An IOError occurred")
 
     return zs
 
