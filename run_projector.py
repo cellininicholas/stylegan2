@@ -73,9 +73,9 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
 
     img_filenames = None
     if dataset_obj._np_filenames is not None:
+        print (dataset_obj._np_filenames)
+        assert dataset_obj._np_filenames.size == num_images
         img_filenames = dataset_obj._np_filenames
-        print (img_filenames)
-        assert len(img_filenames) == num_images
 
     for image_idx in range(num_images):
         print('Projecting image %d/%d...' % (image_idx, num_images))
