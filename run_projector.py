@@ -68,14 +68,14 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
     proj.set_network(Gs)
 
     print('Loading images from "%s"...' % dataset_name)
-    print('Num images "%s"...' % num_images)
+    print('Num images "%d"...' % num_images)
     dataset_obj = dataset.load_dataset(data_dir=data_dir, verbose=True, tfrecord_dir=dataset_name, max_label_size=0, repeat=False, shuffle_mb=0)
     assert dataset_obj.shape == Gs.output_shape[1:]
 
     img_filenames = None
     if dataset_obj._np_filenames is not None:
-        print (dataset_obj._np_filenames)
-        assert num_images <= dataset_obj._np_filenames.size
+        print('filenames_size "%d"...' % dataset_obj.filenames_size)
+        assert num_images <= dataset_obj.filenames_size
         img_filenames = dataset_obj._np_filenames
 
     for image_idx in range(num_images):

@@ -80,10 +80,6 @@ class TFRecordDataset:
         filenames_guess = sorted(glob.glob(os.path.join(self.tfrecord_dir, '*.filenames')))
         if len(filenames_guess):
             self.filenames_file = filenames_guess[0]
-        if self.filenames_file is not None:
-            self._np_filenames = np.load(self.filenames_file)
-            # print(self._np_filenames)
-            assert self._np_filenames.ndim == 1
 
         # Determine shape and resolution.
         max_shape = max(tfr_shapes, key=np.prod)
@@ -115,7 +111,7 @@ class TFRecordDataset:
         self.filenames_size = 0
         if self.filenames_file is not None:
             self._np_filenames = np.load(self.filenames_file)
-            print(self._np_filenames)
+            # print(self._np_filenames)
             self.filenames_size = self._np_filenames.shape[0]
 
         # Build TF expressions.
@@ -218,7 +214,7 @@ def load_dataset(class_name=None, data_dir=None, verbose=False, **kwargs):
         print('Dataset shape =', np.int32(dataset.shape).tolist())
         print('Dynamic range =', dataset.dynamic_range)
         print('Label size    =', dataset.label_size)
-        print('Filenames size    =', dataset.filenames_size)
+        print('Filename size =', dataset.filenames_size)
     return dataset
 
 #----------------------------------------------------------------------------
