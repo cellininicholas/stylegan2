@@ -27,7 +27,7 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
         print ("WILL SAVE npy_file to: " + npy_file_prefix + '.npy')
 
     while proj.get_cur_step() < proj.num_steps:
-        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
+        #print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
         proj.step()
         if proj.get_cur_step() in snapshot_steps:
             misc.save_image_grid(proj.get_images(), png_prefix + 'step%04d.png' % proj.get_cur_step(), drange=[-1,1])
