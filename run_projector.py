@@ -22,9 +22,9 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
     snapshot_steps = set(proj.num_steps - np.linspace(0, proj.num_steps, num_snapshots, endpoint=False, dtype=int))
     misc.save_image_grid(targets, png_prefix + 'target.png', drange=[-1,1])
     proj.start(targets)
-    
-    if labels is not None:
-        print(labels[0])
+
+    if npy_file_prefix is not None:
+        print ("project_image() npy_file_prefix: " + npy_file_prefix)
 
     while proj.get_cur_step() < proj.num_steps:
         print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
@@ -33,8 +33,6 @@ def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, np
             misc.save_image_grid(proj.get_images(), png_prefix + 'step%04d.png' % proj.get_cur_step(), drange=[-1,1])
     print('\r%-30s\r' % '', end='', flush=True)
 
-    if labels is not None:
-        print(labels[0])
     if save_npy:
         proj.save_npy(npy_file_prefix + '.npy')
 
@@ -74,7 +72,6 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
 
     img_filenames = None
     if dataset_obj._np_filenames is not None:
-        print('filenames_size "%d"...' % dataset_obj.filenames_size)
         assert num_images <= dataset_obj.filenames_size
         img_filenames = dataset_obj._np_filenames
 
@@ -83,12 +80,13 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_sna
         images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
 
-        filename = 'z_pos'
-        # filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
-        # print('Filename: %s) ...' % (filename))
+        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
+        print('Filename: %s) ...' % (filename))
 
-        project_image(proj, targets=images, labels=labels, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
-                            num_snapshots=num_snapshots, save_npy=save_vector, npy_file_prefix=filename)
+        project_image(proj, targets=images, labels=labels, 
+                            png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
+                            num_snapshots=num_snapshots, save_npy=save_vector, 
+                            npy_file_prefix=dnnlib.make_run_dir_path(filename)
 
 #----------------------------------------------------------------------------
 
