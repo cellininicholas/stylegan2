@@ -86,7 +86,7 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, start_i
                             png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
                             num_snapshots=num_snapshots, save_npy=save_vector, 
                             npy_file_prefix=dnnlib.make_run_dir_path(filename))
-        print('✅ Finished projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index, num_images, image_idx, filename))
+        print('✅ Finished projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index+1, num_images, image_idx, filename))
 
 #----------------------------------------------------------------------------
 
