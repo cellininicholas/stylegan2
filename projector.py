@@ -189,7 +189,7 @@ class Projector:
 
         # Print status.
         self._cur_step += 1
-        if self._cur_step == self.num_steps or self._cur_step % 10 == 0: #200 == 0:
+        if self._cur_step == self.num_steps or self._cur_step % 50 == 0: #10 == 0:
             self._info('step: %-8d, dist: %-12g, loss: %-12g' % (self._cur_step, dist_value, loss_value))
         if self._cur_step == self.num_steps:
             self._info('Done.')
