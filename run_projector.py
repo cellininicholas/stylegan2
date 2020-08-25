@@ -66,7 +66,7 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, start_i
     proj.set_network(Gs)
 
     print('Loading images from "%s"...' % dataset_name)
-    print('Num images: %d, Starting Index: %d' % num_images, start_index)
+    print('Num images: %d, Starting Index: %d' % (num_images, start_index))
     dataset_obj = dataset.load_dataset(data_dir=data_dir, verbose=True, tfrecord_dir=dataset_name, max_label_size=0, repeat=False, shuffle_mb=0)
     assert dataset_obj.shape == Gs.output_shape[1:]
 
