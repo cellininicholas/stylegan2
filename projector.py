@@ -47,6 +47,8 @@ class Projector:
         self._opt_step              = None
         self._cur_step              = None
 
+        self._latest_loss_value     = None
+
     def _info(self, *args):
         print('Projector:', *args)
 
@@ -183,6 +185,8 @@ class Projector:
         _, dist_value, loss_value = tflib.run([self._opt_step, self._dist, self._loss], feed_dict)
         tflib.run(self._noise_normalize_op)
 
+        self._latest_loss_value = loss_value
+
         # Print status.
         self._cur_step += 1
         if self._cur_step == self.num_steps or self._cur_step % 10 == 0:
@@ -202,7 +206,7 @@ class Projector:
         # print(dlatents)
         
         # dnnlib.make_run_dir_path(filename) has already occured in project_real_images()
-        np.save('%s.npy' % (npy_file_prefix), dlatents)
+        np.save('%s_%0.2f.npy' % (npy_file_prefix, self._latest_loss_value), dlatents)
 
     def get_cur_step(self):
         return self._cur_step
