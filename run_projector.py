@@ -76,17 +76,17 @@ def project_real_images(network_pkl, dataset_name, data_dir, num_images, start_i
         img_filenames = dataset_obj._np_filenames
 
     for image_idx in range(start_index, start_index+num_images):
-        print('Projecting image %d/%d... (index: %d)' % (image_idx-start_index, num_images, image_idx))
+        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
+        print('Projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index, num_images, image_idx, filename))
+
         images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
-
-        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
-        print('Filename: %s ...' % (filename))
 
         project_image(proj, targets=images, labels=labels, 
                             png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
                             num_snapshots=num_snapshots, save_npy=save_vector, 
                             npy_file_prefix=dnnlib.make_run_dir_path(filename))
+        print('✅ Finished projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index, num_images, image_idx, filename))
 
 #----------------------------------------------------------------------------
 

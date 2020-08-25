@@ -189,15 +189,15 @@ class Projector:
 
         # Print status.
         self._cur_step += 1
-        if self._cur_step == self.num_steps or self._cur_step % 10 == 0:
-            self._info('%-8d%-12g%-12g' % (self._cur_step, dist_value, loss_value))
+        if self._cur_step == self.num_steps or self._cur_step % 200 == 0:
+            self._info('step: %-8d, dist: %-12g, loss: %-12g' % (self._cur_step, dist_value, loss_value))
         if self._cur_step == self.num_steps:
             self._info('Done.')
 
     # filename: '%s%05d.npy' % (prefix, row)
     def save_npy(self, npy_file_prefix):
         dlatents = self.get_dlatents()
-        print(dlatents.shape)
+        # print(dlatents.shape)
 
         # if isinstance(dlatents, list):
         #     dlatents = np.array(dlatents).reshape(1, 512)
