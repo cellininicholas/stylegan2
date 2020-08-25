@@ -15,7 +15,7 @@ from training import misc
 
 class Projector:
     def __init__(self):
-        self.num_steps                  = 1000
+        self.num_steps                  = 100 #1000
         self.dlatent_avg_samples        = 100
         self.initial_learning_rate      = 0.1
         self.initial_noise_factor       = 0.05
@@ -189,7 +189,7 @@ class Projector:
 
         # Print status.
         self._cur_step += 1
-        if self._cur_step == self.num_steps or self._cur_step % 200 == 0:
+        if self._cur_step == self.num_steps or self._cur_step % 10 == 0: #200 == 0:
             self._info('step: %-8d, dist: %-12g, loss: %-12g' % (self._cur_step, dist_value, loss_value))
         if self._cur_step == self.num_steps:
             self._info('Done.')
