@@ -15,7 +15,7 @@ from training import misc
 
 class Projector:
     def __init__(self):
-        self.num_steps                  = 1000
+        self.num_steps                  = 400 #1000
         self.dlatent_avg_samples        = 100
         self.initial_learning_rate      = 0.1
         self.initial_noise_factor       = 0.05
@@ -46,6 +46,8 @@ class Projector:
         self._opt                   = None
         self._opt_step              = None
         self._cur_step              = None
+
+        self._latest_loss_value     = None
 
     def _info(self, *args):
         print('Projector:', *args)
@@ -183,12 +185,28 @@ class Projector:
         _, dist_value, loss_value = tflib.run([self._opt_step, self._dist, self._loss], feed_dict)
         tflib.run(self._noise_normalize_op)
 
+        self._latest_loss_value = loss_value
+
         # Print status.
         self._cur_step += 1
-        if self._cur_step == self.num_steps or self._cur_step % 10 == 0:
-            self._info('%-8d%-12g%-12g' % (self._cur_step, dist_value, loss_value))
+        if self._cur_step == self.num_steps or self._cur_step % 50 == 0: #10 == 0:
+            self._info('step: %-8d, dist: %-12g, loss: %-12g' % (self._cur_step, dist_value, loss_value))
         if self._cur_step == self.num_steps:
             self._info('Done.')
+
+    # filename: '%s%05d.npy' % (prefix, row)
+    def save_npy(self, npy_file_prefix):
+        dlatents = self.get_dlatents()
+        # print(dlatents.shape)
+
+        # if isinstance(dlatents, list):
+        #     dlatents = np.array(dlatents).reshape(1, 512)
+        # elif isinstance(dlatents, np.ndarray):
+        #     dlatents[0].reshape(1, 512)
+        # print(dlatents)
+        
+        # dnnlib.make_run_dir_path(filename) has already occured in project_real_images()
+        np.save('%s_%0.2f.npy' % (npy_file_prefix, self._latest_loss_value), dlatents)
 
     def get_cur_step(self):
         return self._cur_step

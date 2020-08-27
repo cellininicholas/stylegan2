@@ -36,10 +36,14 @@ def generate_images_from_seeds(seeds, truncation_psi):
 
 
 def convertZtoW(latent, truncation_psi=0.7, truncation_cutoff=9):
+    print ("   ⚠️ convertZtoW() .")
     dlatent = Gs.components.mapping.run(
         latent, None)  # [seed, layer, component]
+    print ("   ⚠️ convertZtoW() ..")
     dlatent_avg = Gs.get_var('dlatent_avg')  # [component]
+    print ("   ⚠️ convertZtoW() ...")
     for i in range(truncation_cutoff):
+        print ("   ⚠️ convertZtoW() ... " + i)
         dlatent[0][i] = (dlatent[0][i]-dlatent_avg) * \
             truncation_psi + dlatent_avg
 
@@ -74,6 +78,7 @@ def generate_latent_images(zs, truncation_psi, save_npy, prefix):
 
 
 def generate_images_in_w_space(dlatents, truncation_psi, save_npy, prefix):
+    print ("   ⚠️ generate_images_in_w_space")
     Gs_kwargs = dnnlib.EasyDict()
     Gs_kwargs.output_transform = dict(
         func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
@@ -97,6 +102,7 @@ def generate_images_in_w_space(dlatents, truncation_psi, save_npy, prefix):
 
 
 def line_interpolate(zs, steps):
+    print ("   ⚠️ line_interpolate()")
     out = []
     for i in range(len(zs)-1):
         for index in range(steps):
@@ -305,7 +311,7 @@ def square_interpolate(zs, steps_per_row):
     return out
 
 
-def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, npys, save_vector, diameter=2.0, start_seed=0):
+def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, npys, npys_type, save_vector, diameter=2.0, start_seed=0):
     global _G, _D, Gs, noise_vars
     print('Loading networks from "%s"...' % network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(network_pkl)
@@ -313,9 +319,9 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
     ) if name.startswith('noise')]
     zs = []
 
-    if(len(seeds) > 0):
+    if(seeds is not None and len(seeds) > 0):
         zs = generate_zs_from_seeds(seeds, Gs)
-    elif(len(npys) > 0):
+    elif(npys is not None and len(npys) > 0):
         zs = npys
 
     # Default = "line"
@@ -326,11 +332,16 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
         number_of_steps = int(frames/(len(zs)-1))+1
 
         if (len(walk_type) > 1 and walk_type[1] == 'w'):
+            print ("   ⚠️ Compute points and zpoints for walk_type='line-w'")
             ws = []
-            for i in range(len(zs)):
-                ws.append(convertZtoW(zs[i]))
+            if npys_type is not None and npys_type == 'w':
+                print ("   ⚠️ npys_type='w'")
+                ws = zs
+            else:
+                for i in range(len(zs)):
+                    ws.append(convertZtoW(zs[i]))
+                zpoints = line_interpolate(zs, number_of_steps)
             points = line_interpolate(ws, number_of_steps)
-            zpoints = line_interpolate(zs, number_of_steps)
         else:
             points = line_interpolate(zs, number_of_steps)
 
@@ -441,8 +452,15 @@ def _parse_npy_files(files):
     print(files)
     zs = []
 
-    for f in files:
-        zs.append(np.load(files[f]))
+    for f in files.split(','):
+        print("NPY FILE: '" + f + "'")
+        zs.append(np.load(f))
+        # try:
+        #     zs.append(np.load(files[f]))
+        # except IOError as e:
+        #     print ("I/O error(%d): %s" % (e.errno, e.strerror))
+        # except ValueError:
+        #     print("An IOError occurred")
 
     return zs
 
@@ -513,6 +531,8 @@ Run 'python %(prog)s <subcommand> --help' for subcommand help.''',
         '--seeds', type=_parse_num_range, help='List of random seeds')
     parser_generate_latent_walk.add_argument(
         '--npys', type=_parse_npy_files, help='List of .npy files')
+    parser_generate_latent_walk.add_argument(
+        '--npys-type', help='z or w (default: %(default)s)', default='z')
     parser_generate_latent_walk.add_argument(
         '--save_vector', dest='save_vector', action='store_true', help='also save vector in .npy format')
     parser_generate_latent_walk.add_argument(
