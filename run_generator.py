@@ -36,14 +36,14 @@ def generate_images_from_seeds(seeds, truncation_psi):
 
 
 def convertZtoW(latent, truncation_psi=0.7, truncation_cutoff=9):
-    print ("   ⚠️ convertZtoW() .")
+    print("   ⚠️ convertZtoW() .")
     dlatent = Gs.components.mapping.run(
         latent, None)  # [seed, layer, component]
-    print ("   ⚠️ convertZtoW() ..")
+    print("   ⚠️ convertZtoW() ..")
     dlatent_avg = Gs.get_var('dlatent_avg')  # [component]
-    print ("   ⚠️ convertZtoW() ...")
+    print("   ⚠️ convertZtoW() ...")
     for i in range(truncation_cutoff):
-        print ("   ⚠️ convertZtoW() ... " + i)
+        print("   ⚠️ convertZtoW() ... " + i)
         dlatent[0][i] = (dlatent[0][i]-dlatent_avg) * \
             truncation_psi + dlatent_avg
 
@@ -78,7 +78,7 @@ def generate_latent_images(zs, truncation_psi, save_npy, prefix):
 
 
 def generate_images_in_w_space(dlatents, truncation_psi, save_npy, prefix):
-    print ("   ⚠️ generate_images_in_w_space")
+    print("   ⚠️ generate_images_in_w_space")
     Gs_kwargs = dnnlib.EasyDict()
     Gs_kwargs.output_transform = dict(
         func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
@@ -102,12 +102,23 @@ def generate_images_in_w_space(dlatents, truncation_psi, save_npy, prefix):
 
 
 def line_interpolate(zs, steps):
-    print ("   ⚠️ line_interpolate()")
+    print("   ⚠️ line_interpolate()")
     out = []
     for i in range(len(zs)-1):
         for index in range(steps):
             fraction = index/float(steps)
             out.append(zs[i+1]*fraction + zs[i]*(1-fraction))
+    return out
+
+
+def line_interpolate_w(ws, steps):
+    out = []
+    for i in range(len(ws) - 1):
+        cur = np.array(ws[i][0])  # ignore a dimension, artifact of projection batch
+        nex = np.array(ws[i+1][0])
+        for index in range(steps):
+            fraction = index/float(steps)
+            out.append(nex*fraction + cur*(1-fraction))
     return out
 
 
@@ -332,16 +343,16 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
         number_of_steps = int(frames/(len(zs)-1))+1
 
         if (len(walk_type) > 1 and walk_type[1] == 'w'):
-            print ("   ⚠️ Compute points and zpoints for walk_type='line-w'")
+            print("   ⚠️ Compute points and zpoints for walk_type='line-w'")
             ws = []
             if npys_type is not None and npys_type == 'w':
-                print ("   ⚠️ npys_type='w'")
+                print("   ⚠️ npys_type='w'")
                 ws = zs
             else:
                 for i in range(len(zs)):
                     ws.append(convertZtoW(zs[i]))
                 zpoints = line_interpolate(zs, number_of_steps)
-            points = line_interpolate(ws, number_of_steps)
+            points = line_interpolate_w(ws, number_of_steps)
         else:
             points = line_interpolate(zs, number_of_steps)
 

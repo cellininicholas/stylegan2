@@ -17,15 +17,18 @@ if network == None:
     exit()
 
 
-@app.route("/morph", methods=["POST"])
+@app.route("/stylegan/morph", methods=["POST"])
 @cross_origin()
 def morph():
     image_1 = request.json['image1']
     image_2 = request.json['image2']
 
-    projection_patt = 'projection-results/{}*.npy'
-    npy_1 = glob(projection_patt.format(image_1))
-    npy_2 = glob(projection_patt.format(image_2))
+    # ensure that our morphs are always alphabetically sorted
+    image_1, image_2 = sorted([image_1, image_2])
+
+    projection_patt = 'w_latents/{}*.npy'
+    npy_1 = glob(projection_patt.format(image_1))[0]
+    npy_2 = glob(projection_patt.format(image_2))[0]
 
     ws_1 = run_generator._parse_npy_files(npy_1)
     ws_2 = run_generator._parse_npy_files(npy_2)
@@ -34,10 +37,12 @@ def morph():
         'network_pkl': network,
         'truncation_psi': 1.0,
         'walk_type': 'line-w',
-        'frames': 32,
+        'frames': 25,
         'npys': [ws_1, ws_2],
         'npys_type': 'w',
-        'result_dir': 'results'
+        'result_dir': 'server_walk_results',
+        'seeds': [],
+        'save_vector': False
     }
 
     sc = dnnlib.SubmitConfig()
