@@ -4,7 +4,7 @@ import dnnlib
 
 from flask import Flask, request, send_file
 from flask_cors import cross_origin
-from os import environ, makedirs
+from os import environ, makedirs, path
 from subprocess import run
 from glob import glob
 from math import sqrt
@@ -26,6 +26,7 @@ def morph():
     image_1 = request.json['image1']
     image_2 = request.json['image2']
     fc = request.json['frame_count']
+    no_cache = 'no_cache' in request.json and request.json['no_cache'] is True
     if fc is None:
         fc = 9
     # floor the resolution
@@ -50,7 +51,7 @@ def morph():
         'network_pkl': network,
         'truncation_psi': 1.0,
         'walk_type': 'line-w',
-        'frames': frames,
+        'frames': frames-1,
         'npys': [ws_1, ws_2],
         'npys_type': 'w',
         'result_dir': 'server_walk_results',
@@ -67,14 +68,14 @@ def morph():
     result_path, _ = dnnlib.submit_run(
         sc, 'run_generator.generate_latent_walk', **kwargs)
     morph_pattern = "{}/*.png".format(result_path)
-    sheet = make_spritesheet(morph_pattern, image_1+image_2)
+    sheet = make_spritesheet(morph_pattern, image_1+image_2, no_cache)
     # delete result_path since we have our sheet
-    # rmtree(result_path)
+    rmtree(result_path)
     # TODO: upload to bucket instead of storing locally
     # return the file
     return send_file(sheet)
 
-def make_spritesheet(pattern, output_name):
+def make_spritesheet(pattern, output_name, no_cache=False):
     # make sure output dir exists
     makedirs("spritesheets", exist_ok=True)
     # count images
@@ -83,9 +84,14 @@ def make_spritesheet(pattern, output_name):
     assert(edge_count % 1 == 0) # ensure we have a square number
     # run image magick
     output_path = "spritesheets/{}.png".format(output_name)
+
+    # check if sheet exists
+    if not no_cache and path.exists(output_path):
+        return output_path
+
     # montage *.png -geometry 512x512 -colors 32 spritesheets/example.png
     run([
-        "montage", pattern, "-geometry 512x512", "-colors 32", output_path
+        "montage", pattern, "-geometry", "512x512", "-colors", "32", output_path
     ])
     return output_path
 
