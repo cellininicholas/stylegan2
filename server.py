@@ -12,6 +12,12 @@ from shutil import rmtree
 
 import run_generator
 
+from google.cloud import storage
+
+# connect to storage to place morphs
+client = storage.Client()
+bucket = client.get_bucket('botany-morphs')
+
 app = Flask(__name__)
 
 network = environ.get('NETWORK', None)
@@ -34,10 +40,11 @@ def morph():
 
     # ensure that our morphs are always alphabetically sorted
     image_1, image_2 = sorted([image_1, image_2])
-    output_path = "spritesheets/{}_{}_{}.png".format(image_1, image_2, frames)
+    output_path = "spritesheets/{}_{}_{}.jpg".format(image_1, image_2, frames)
     # check if sheet exists to return early
-    if not no_cache and path.exists(output_path):
-        return send_file(output_path)
+    bucket_blob = bucket.blob(output_path)
+    if not no_cache and bucket_blob.exists():
+        return bucket_blob.public_url
 
     try:
         projection_patt = 'w_latents/{}*.npy'
@@ -45,7 +52,6 @@ def morph():
         npy_2 = glob(projection_patt.format(image_2))[0]
     except IndexError:
         return "projection for one or both images not found", 400
-
 
     ws_1 = run_generator._parse_npy_files(npy_1)
     ws_2 = run_generator._parse_npy_files(npy_2)
@@ -74,9 +80,12 @@ def morph():
     sheet = make_spritesheet(morph_pattern, output_path, no_cache)
     # delete result_path since we have our sheet
     rmtree(result_path)
-    # TODO: upload to bucket instead of storing locally
+    # upload to bucket instead of storing locally
+    bucket_blob.upload_from_filename(sheet)
+    rmtree(sheet)
     # return the file
-    return send_file(sheet)
+    return bucket_blob.public_url
+
 
 def make_spritesheet(pattern, output_path, no_cache=False):
     # make sure output dir exists
@@ -84,12 +93,10 @@ def make_spritesheet(pattern, output_path, no_cache=False):
     # count images
     result_imgs = glob(pattern)
     edge_count = sqrt(len(result_imgs))
-    assert(edge_count % 1 == 0) # ensure we have a square number
+    assert(edge_count % 1 == 0)  # ensure we have a square number
     # run image magick
     # montage *.png -geometry 512x512 -colors 32 spritesheets/example.png
     run([
         "montage", pattern, "-geometry", "512x512", "-colors", "32", output_path
     ])
     return output_path
-
-
