@@ -48,8 +48,8 @@ def kwargs_from_projections(image_1, image_2, frames):
 
 
 def kwards_from_seeds(image_1: str, image_2, frames):
-    seed1 = image_1.split("seed")[1].split(".png")[0]
-    seed2 = image_2.split("seed")[1].split(".png")[0]
+    seed1 = image_1.split("seed")[1].split(".png")[0].split(".jpg")[0]
+    seed2 = image_2.split("seed")[1].split(".png")[0].split(".jpg")[0]
 
     return {
         'network_pkl': network,
