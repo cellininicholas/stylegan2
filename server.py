@@ -50,12 +50,16 @@ def kwargs_from_projections(image_1, image_2, frames):
 def kwards_from_seeds(image_1: str, image_2, frames):
     seed1 = image_1.split("seed")[1].split(".png")[0].split(".jpg")[0]
     seed2 = image_2.split("seed")[1].split(".png")[0].split(".jpg")[0]
+    seed1 = int(seed1)
+    seed2 = int(seed2)
 
     return {
         'network_pkl': network,
         'truncation_psi': 1.0,
         'walk_type': 'line',
-        'frames': frames-1,
+        'frames': frames - 1,
+        'npys': [],
+        'npys_type': None,
         'result_dir': 'server_walk_results',
         'seeds': [seed1, seed2],
         'save_vector': False
@@ -69,7 +73,7 @@ def morph():
     image_2 = request.json['image2']
     fc = request.json['frame_count']
     no_cache = 'no_cache' in request.json and request.json['no_cache'] is True
-    seeded = 'seeded' in request.json and request.json['seeded'] is False
+    seeded = 'seeded' in request.json and request.json['seeded'] is True
     if fc is None:
         fc = 9
     # floor the resolution
@@ -84,10 +88,10 @@ def morph():
         return bucket_blob.public_url
 
     if seeded:
-        kwargs = kwards_from_seeds()
+        kwargs = kwards_from_seeds(image_1, image_2, frames)
     else:
         try:
-            kwargs = kwargs_from_projections()
+            kwargs = kwargs_from_projections(image_1, image_2, frames)
         except IndexError:
             return "projection for one or both images not found", 400
 
