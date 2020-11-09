@@ -15,7 +15,12 @@ to install imagemagick
 
 ```sh
 pip install --user -r requirements.txt
+gsutil cp gs://botanicals-img/BioDiv-BG-Removed/masked_12k-0.5-snapshot-013620.pkl pkl/
 NETWORK=pkl/masked_12k-0.5-snapshot-013620.pkl ~/.local/bin/gunicorn -b :5050 server:app -t 180
+// OR
+NETWORK=pkl/masked_12k-0.5-snapshot-013620.pkl gunicorn -b :5050 server:app -t 180
+// OR
+NETWORK=pkl/masked_12k-0.5-snapshot-013620.pkl /opt/conda/bin/gunicorn -b :5050 server:app -t 180
 ```
 
 ## INSTALL
