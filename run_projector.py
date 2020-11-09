@@ -18,16 +18,23 @@ from training import misc
 
 #----------------------------------------------------------------------------
 
-def project_image(proj, targets, png_prefix, num_snapshots):
+def project_image(proj, targets, labels, png_prefix, num_snapshots, save_npy, npy_file_prefix):
     snapshot_steps = set(proj.num_steps - np.linspace(0, proj.num_steps, num_snapshots, endpoint=False, dtype=int))
     misc.save_image_grid(targets, png_prefix + 'target.png', drange=[-1,1])
     proj.start(targets)
+
+    if npy_file_prefix is not None and save_npy:
+        print ("WILL SAVE npy_file to: " + npy_file_prefix + '_<LOSS>.npy')
+
     while proj.get_cur_step() < proj.num_steps:
-        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
+        #print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
         proj.step()
         if proj.get_cur_step() in snapshot_steps:
-            misc.save_image_grid(proj.get_images(), png_prefix + 'step%04d.png' % proj.get_cur_step(), drange=[-1,1])
+            misc.save_image_grid(proj.get_images(), png_prefix + 'step%04d_%0.2f.png' % (proj.get_cur_step(), proj._latest_loss_value), drange=[-1,1])
     print('\r%-30s\r' % '', end='', flush=True)
+
+    if npy_file_prefix is not None and save_npy:
+        proj.save_npy(npy_file_prefix)
 
 #----------------------------------------------------------------------------
 
@@ -48,25 +55,38 @@ def project_generated_images(network_pkl, seeds, num_snapshots, truncation_psi):
         z = rnd.randn(1, *Gs.input_shape[1:])
         tflib.set_vars({var: rnd.randn(*var.shape.as_list()) for var in noise_vars})
         images = Gs.run(z, None, **Gs_kwargs)
-        project_image(proj, targets=images, png_prefix=dnnlib.make_run_dir_path('seed%04d-' % seed), num_snapshots=num_snapshots)
+        project_image(proj, targets=images, labels=None, png_prefix=dnnlib.make_run_dir_path('seed%04d-' % seed), num_snapshots=num_snapshots, save_npy=False, npy_file_prefix='NONAME')
 
 #----------------------------------------------------------------------------
 
-def project_real_images(network_pkl, dataset_name, data_dir, num_images, num_snapshots):
+def project_real_images(network_pkl, dataset_name, data_dir, num_images, start_index, num_snapshots, save_vector):
     print('Loading networks from "%s"...' % network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(network_pkl)
     proj = projector.Projector()
     proj.set_network(Gs)
 
     print('Loading images from "%s"...' % dataset_name)
-    dataset_obj = dataset.load_dataset(data_dir=data_dir, tfrecord_dir=dataset_name, max_label_size=0, repeat=False, shuffle_mb=0)
+    print('Num images: %d, Starting Index: %d' % (num_images, start_index))
+    dataset_obj = dataset.load_dataset(data_dir=data_dir, verbose=True, tfrecord_dir=dataset_name, max_label_size=0, repeat=False, shuffle_mb=0)
     assert dataset_obj.shape == Gs.output_shape[1:]
 
-    for image_idx in range(num_images):
-        print('Projecting image %d/%d ...' % (image_idx, num_images))
-        images, _labels = dataset_obj.get_minibatch_np(1)
+    img_filenames = None
+    if dataset_obj._np_filenames is not None:
+        assert num_images <= dataset_obj.filenames_size
+        img_filenames = dataset_obj._np_filenames
+
+    for image_idx in range(start_index, start_index+num_images):
+        filename = img_filenames[image_idx] if img_filenames is not None else 'unknown'
+        print('Projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index, num_images, image_idx, filename))
+
+        images, labels = dataset_obj.get_minibatch_np(1)
         images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
-        project_image(proj, targets=images, png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), num_snapshots=num_snapshots)
+
+        project_image(proj, targets=images, labels=labels, 
+                            png_prefix=dnnlib.make_run_dir_path('image%04d-' % image_idx), 
+                            num_snapshots=num_snapshots, save_npy=save_vector, 
+                            npy_file_prefix=dnnlib.make_run_dir_path(filename))
+        print('✅ Finished projecting image %d/%d... (index: %d, filename: %s)' % (image_idx-start_index+1, num_images, image_idx, filename))
 
 #----------------------------------------------------------------------------
 
@@ -118,7 +138,9 @@ Run 'python %(prog)s <subcommand> --help' for subcommand help.''',
     project_real_images_parser.add_argument('--dataset', help='Training dataset', dest='dataset_name', required=True)
     project_real_images_parser.add_argument('--num-snapshots', type=int, help='Number of snapshots (default: %(default)s)', default=5)
     project_real_images_parser.add_argument('--num-images', type=int, help='Number of images to project (default: %(default)s)', default=3)
+    project_real_images_parser.add_argument('--start-index', type=int, help='The image index to start on (default: %(default)s)', default=0)
     project_real_images_parser.add_argument('--result-dir', help='Root directory for run results (default: %(default)s)', default='results', metavar='DIR')
+    project_real_images_parser.add_argument('--save_vector', dest='save_vector', action='store_true', help='also save vector in .npy format')
 
     args = parser.parse_args()
     subcmd = args.command

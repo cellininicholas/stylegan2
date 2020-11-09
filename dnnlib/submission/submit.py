@@ -340,4 +340,4 @@ def submit_run(submit_config: SubmitConfig, run_func_name: str, **run_func_kwarg
     # Farm specific preparations for a submit
     farm.finalize_submit_config(submit_config, host_run_dir)
     _populate_run_dir(submit_config, host_run_dir)
-    return farm.submit(submit_config, host_run_dir)
+    return host_run_dir, farm.submit(submit_config, host_run_dir)

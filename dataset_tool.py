@@ -64,6 +64,12 @@ class TFRecordExporter:
         return order
 
     def add_image(self, img):
+        
+        # img_filename = ''
+        # if (img_filepath is not None):
+        #     img_filename = os.path.basename(img_filepath)
+        #     print("add_image() img_filename: " + img_filename + ", path: " + img_filepath)
+
         if self.print_progress and self.cur_images % self.progress_interval == 0:
             print('%d / %d\r' % (self.cur_images, self.expected_images), end='', flush=True)
         if self.shape is None:
@@ -84,9 +90,18 @@ class TFRecordExporter:
             quant = np.rint(img).clip(0, 255).astype(np.uint8)
             ex = tf.train.Example(features=tf.train.Features(feature={
                 'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=quant.shape)),
-                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))}))
+                'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[quant.tostring()]))
+            }))
+
             tfr_writer.write(ex.SerializeToString())
         self.cur_images += 1
+
+    def add_labels_filenames(self, filenames):
+        if self.print_progress:
+            print('%-40s\r' % 'Saving filename strings...', end='', flush=True)
+        assert filenames.shape[0] == self.cur_images
+        with open(self.tfr_prefix + '-rxx.filenames', 'wb') as f:
+            np.save(f, filenames.astype(np.str))
 
     def add_labels(self, labels):
         if self.print_progress:
@@ -518,7 +533,11 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
     with TFRecordExporter(tfrecord_dir, len(image_filenames), print_progress=False) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
+        image_filenames_inorder = np.array(list(map(lambda i,: os.path.basename(image_filenames[i]), order)))
+        print(image_filenames_inorder)
+
         for idx in tqdm(range(order.size)):
+            # img_filename = image_filenames[order[idx]]
             im = PIL.Image.open(image_filenames[order[idx]])
             img = np.asarray(im)
             if img.ndim != 3:
@@ -529,6 +548,8 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
             else:
                 img = img.transpose([2, 0, 1]) # HWC => CHW
             tfr.add_image(img)
+        
+        tfr.add_labels_filenames(image_filenames_inorder)
 
 #----------------------------------------------------------------------------
 
