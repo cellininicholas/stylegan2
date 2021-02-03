@@ -50,7 +50,7 @@ def convertZtoW(latent, truncation_psi=0.7, truncation_cutoff=9):
     return dlatent
 
 
-def generate_latent_images(zs, truncation_psi, save_npy, prefix):
+def generate_latent_images(zs, truncation_psi, save_npy, prefix, start_frame=0):
     Gs_kwargs = dnnlib.EasyDict()
     Gs_kwargs.output_transform = dict(
         func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
@@ -58,12 +58,16 @@ def generate_latent_images(zs, truncation_psi, save_npy, prefix):
     if not isinstance(truncation_psi, list):
         truncation_psi = [truncation_psi] * len(zs)
 
-    for z_idx, z in enumerate(zs):
+    zs_count = len(zs)
+
+    for z_idx_raw, z in enumerate(zs[slice(start_frame, zs_count)]):
+        z_idx = z_idx_raw + start_frame
+    # for z_idx, z in enumerate(zs):
         if isinstance(z, list):
             z = np.array(z).reshape(1, 512)
         elif isinstance(z, np.ndarray):
             z.reshape(1, 512)
-        print('Generating image for step %d/%d ...' % (z_idx, len(zs)))
+        print('Generating image for step %d/%d ...' % (z_idx, zs_count))
         Gs_kwargs.truncation_psi = truncation_psi[z_idx]
         noise_rnd = np.random.RandomState(1)  # fix noise
         tflib.set_vars({var: noise_rnd.randn(*var.shape.as_list())
@@ -322,7 +326,7 @@ def square_interpolate(zs, steps_per_row):
     return out
 
 
-def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, npys, npys_type, save_vector, diameter=2.0, start_seed=0):
+def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, npys, npys_type, save_vector, diameter=2.0, start_seed=0, start_frame=0):
     global _G, _D, Gs, noise_vars
     print('Loading networks from "%s"...' % network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(network_pkl)
@@ -378,7 +382,7 @@ def generate_latent_walk(network_pkl, truncation_psi, walk_type, frames, seeds, 
         print('%s is not currently supported in w space, please change your interpolation type' % (
             walk_type[0]))
     else:
-        generate_latent_images(points, truncation_psi, save_vector, 'frame')
+        generate_latent_images(points, truncation_psi, save_vector, 'frame', start_frame)
 
 
 # ----------------------------------------------------------------------------
@@ -538,6 +542,8 @@ Run 'python %(prog)s <subcommand> --help' for subcommand help.''',
         '--walk-type', help='Type of walk (default: %(default)s)', default='line')
     parser_generate_latent_walk.add_argument(
         '--frames', type=int, help='Frame count (default: %(default)s', default=240)
+    parser_generate_latent_walk.add_argument(
+        '--start_frame', type=int, help='Frame index to start on (default: %(default)s', default=0)
     parser_generate_latent_walk.add_argument(
         '--seeds', type=_parse_num_range, help='List of random seeds')
     parser_generate_latent_walk.add_argument(
